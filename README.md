@@ -1,7 +1,7 @@
 # Estrutura do Banco de Dados
 O banco é estruturado em torno das seguintes entidades:<br/>
 
-`organization` — a unidade fitness cadastrada no sistema (ex.: LCKR Training Club), preparando o sistema para eventualmente atender mais de uma unidade.<br/>
+`organization` — a unidade fitness cadastrada no sistema LCKR Training Club, preparando o sistema para eventualmente atender mais de uma unidade.<br/>
 `users` — contas de acesso ao sistema, usadas pela secretaria e pela administração.<br/>
 `coaches` — cadastro dos professores, vinculados a uma organization.<br/>
 `lessons` — aulas ministradas, vinculadas a um coach.<br/>
