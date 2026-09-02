@@ -8,13 +8,7 @@ create table organization(
 	endereco varchar(100) not null
 );
 
--- CRIAÇÃO DA TABELA USERS
--- Tabela para informações importantes dos usuários
--- que utilizaram o sistema
-
--- CRIAÇÃO DO TIPO UTILIZADO EM USERS
--- Para saber se um usuário é ADMIN ou não
-create type is_admin as enum('sim', 'não');
+insert into organization ()
 
 -- CRIAÇÃO DA TABELA USERS
 -- Tabela para informações gerais dos usuários
@@ -22,7 +16,6 @@ create table users(
 	id uuid primary key default gen_random_uuid(),
 	nome varchar(50) not null,
 	email varchar(50) not null,
-	is_admin is_admin not null default 'não',
 	created_at timestamptz not null default now(),
 	updated_at timestamptz not null default now(),
 	organization_cnpj varchar(14) not null,
