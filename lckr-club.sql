@@ -8,8 +8,6 @@ create table organization(
 	endereco varchar(100) not null
 );
 
-insert into organization ()
-
 -- CRIAÇÃO DA TABELA USERS
 -- Tabela para informações gerais dos usuários
 create table users(
