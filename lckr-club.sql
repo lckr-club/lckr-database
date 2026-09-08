@@ -14,6 +14,7 @@ create table users(
 	id uuid primary key default gen_random_uuid(),
 	nome varchar(50) not null,
 	email varchar(50) not null,
+	senha varchar(50) not null,
 	created_at timestamptz not null default now(),
 	updated_at timestamptz not null default now(),
 	organization_cnpj varchar(14) not null,
