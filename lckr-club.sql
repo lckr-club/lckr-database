@@ -21,23 +21,6 @@ create table users(
 	foreign key (organization_cnpj) references organization(cnpj)
 );
 
--- CRIAÇÃO DO TIPO UTILIZADO PARA STATUS DE PAYMENT
-create type status_pagamento as enum('pendente', 'pago', 'cancelado', 'atrasado');
-
--- CRIAÇÃO DA TABELA PAYMENTS
--- Tabela para controle e histórico dos pagamentos
-create table payments(
-	id uuid primary key default gen_random_uuid(),
-	valor decimal(5,2) not null,
-	data_pagamento date not null,
-	status status_pagamento not null default 'pendente',
-	mes_referencia varchar(10) not null,
-	descricao varchar(50) not null,
-	pago_em date not null,
-	organization_cnpj varchar(14) not null,
-	foreign key (organization_cnpj) references organization(cnpj)
-);
-
 -- CRIAÇÃO DO TIPO UTILIZADO PARA STATUS DOS COACHES
 create type status_coaches as enum('ativo', 'inativo');
 
@@ -56,6 +39,25 @@ create table coaches(
 	created_at timestamptz not null default now(),
 	updated_at timestamptz not null default now(),
 	organization_cnpj varchar(14) not null,
+	foreign key (organization_cnpj) references organization(cnpj)
+);
+
+-- CRIAÇÃO DO TIPO UTILIZADO PARA STATUS DE PAYMENT
+create type status_pagamento as enum('pendente', 'pago', 'cancelado', 'atrasado');
+
+-- CRIAÇÃO DA TABELA PAYMENTS
+-- Tabela para controle e histórico dos pagamentos
+create table payments(
+	id uuid primary key default gen_random_uuid(),
+	valor decimal(5,2) not null,
+	data_pagamento date not null,
+	status status_pagamento not null default 'pendente',
+	mes_referencia varchar(10) not null,
+	descricao varchar(50) not null,
+	pago_em date not null,
+	cpf_coach varchar(11) not null,
+	organization_cnpj varchar(14) not null,
+	foreign key (cpf_coach) references coach(cpf),
 	foreign key (organization_cnpj) references organization(cnpj)
 );
 
