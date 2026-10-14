@@ -1,97 +1,93 @@
--- CRIAÇÃO DA TABELA ORGANIZATION
+-- Definição dos tipos
+
+CREATE TYPE status_coaches AS ENUM ('ativo', 'inativo');
+CREATE TYPE status_pagamento AS ENUM ('pendente', 'pago', 'cancelado', 'atrasado');
+CREATE TYPE status_lessons AS ENUM ('agendada', 'realizada');
+
+-- TABELAS
+
 -- Tabela para as informações importantes da empresa
-create table organization(
-	cnpj varchar(14) primary key,
-	razao_social varchar(50) not null,
-	nome varchar(50) not null,
-	email varchar(50) not null,
-	endereco varchar(100) not null
+CREATE TABLE organization (
+    cnpj VARCHAR(14) PRIMARY KEY,
+    razao_social VARCHAR(150) NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    endereco VARCHAR(255) NOT NULL
 );
 
--- CRIAÇÃO DA TABELA USERS
 -- Tabela para informações gerais dos usuários
-create table users(
-	id uuid primary key default gen_random_uuid(),
-	nome varchar(50) not null,
-	email varchar(50) not null,
-	senha varchar(50) not null,
-	created_at timestamptz not null default now(),
-	updated_at timestamptz not null default now(),
-	organization_cnpj varchar(14) not null,
-	foreign key (organization_cnpj) references organization(cnpj)
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    nome VARCHAR(150) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    organization_cnpj VARCHAR(14) NOT NULL,
+    
+    CONSTRAINT fk_users_organization FOREIGN KEY (organization_cnpj) REFERENCES organization(cnpj) ON DELETE CASCADE
 );
 
--- CRIAÇÃO DO TIPO UTILIZADO PARA STATUS DOS COACHES
-create type status_coaches as enum('ativo', 'inativo');
-
--- CRIAÇÃO DA TABELA COACHES
 -- Tabela para cadastro e gerenciamento dos coaches
-create table coaches(
-	cpf varchar(11) primary key not null,
-	nome varchar(50) not null,
-	email varchar(50) not null,
-	senha varchar(50) not null,
-	telefone varchar(11) not null,
-	data_admissao date not null,
-	especialidade varchar(50) not null,
-	status status_coaches not null default 'inativo',
-	salario_atual decimal(6,2) not null,
-	created_at timestamptz not null default now(),
-	updated_at timestamptz not null default now(),
-	organization_cnpj varchar(14) not null,
-	foreign key (organization_cnpj) references organization(cnpj)
+CREATE TABLE coaches (
+    cpf VARCHAR(11) PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+    telefone VARCHAR(15) NOT NULL,
+    data_admissao DATE NOT NULL,
+    especialidade VARCHAR(100) NOT NULL,
+    status status_coaches NOT NULL DEFAULT 'inativo',
+    salario_atual DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    organization_cnpj VARCHAR(14) NOT NULL,
+    
+    CONSTRAINT fk_coaches_organization FOREIGN KEY (organization_cnpj) REFERENCES organization(cnpj) ON DELETE CASCADE
 );
 
--- CRIAÇÃO DO TIPO UTILIZADO PARA STATUS DE PAYMENT
-create type status_pagamento as enum('pendente', 'pago', 'cancelado', 'atrasado');
-
--- CRIAÇÃO DA TABELA PAYMENTS
 -- Tabela para controle e histórico dos pagamentos
-create table payments(
-	id uuid primary key default gen_random_uuid(),
-	valor decimal(5,2) not null,
-	data_pagamento date not null,
-	status status_pagamento not null default 'pendente',
-	mes_referencia varchar(10) not null,
-	descricao varchar(50) not null,
-	pago_em date not null,
-	cpf_coach varchar(11) not null,
-	organization_cnpj varchar(14) not null,
-	foreign key (cpf_coach) references coach(cpf),
-	foreign key (organization_cnpj) references organization(cnpj)
+CREATE TABLE payments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    valor DECIMAL(10,2) NOT NULL,
+    data_pagamento DATE NOT NULL,
+    status status_pagamento NOT NULL DEFAULT 'pendente',
+    mes_referencia VARCHAR(7) NOT NULL,
+    descricao VARCHAR(255) NOT NULL,
+    pago_em DATE,
+    cpf_coach VARCHAR(11) NOT NULL,
+    organization_cnpj VARCHAR(14) NOT NULL,
+    
+    CONSTRAINT fk_payments_coach FOREIGN KEY (cpf_coach) REFERENCES coaches(cpf) ON DELETE RESTRICT,
+    CONSTRAINT fk_payments_organization FOREIGN KEY (organization_cnpj) REFERENCES organization(cnpj) ON DELETE CASCADE
 );
 
--- CRIAÇÃO DO TIPO UTILIZADO PARA STATUS DAS LESSONS
-create type status_lessons as enum('agendada', 'realizada');
-
--- CRIAÇÃO DA TABELA LESSONS
 -- Tabela para gerenciamento das aulas
-create table lessons(
-	id uuid primary key default gen_random_uuid(),
-	data_aula date not null,
-	hora_inicio time not null,
-	hora_fim time not null,
-	capacidade int not null,
-	status status_lessons not null default 'agendada',
-	descricao varchar(50) not null,
-	created_at timestamptz not null default now(),
-	updated_at timestamptz not null default now(),
-	coach_cpf varchar(11) not null,
-	foreign key (coach_cpf) references coaches(cpf)
+CREATE TABLE lessons (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    data_aula DATE NOT NULL,
+    hora_inicio TIME NOT NULL,
+    hora_fim TIME NOT NULL,
+    capacidade INT NOT NULL,
+    status status_lessons NOT NULL DEFAULT 'agendada',
+    descricao VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    cpf_coach VARCHAR(11) NOT NULL,
+    
+    CONSTRAINT fk_lessons_coach FOREIGN KEY (cpf_coach) REFERENCES coaches(cpf) ON DELETE RESTRICT
 );
 
--- CRIAÇÃO DA TABELA COACH_SALARY_HISTORY
--- Tabela para registrar o histórico de salário
--- dos coaches ao longo do tempo
-create table coach_salary_history(
-	id uuid primary key default gen_random_uuid(),
-	coach_cpf varchar(11) not null,
-	salario decimal(6,2) not null,
-	data_inicio date not null,
-	data_fim date,
-	motivo varchar(100),
-	data_pagamento date,
-	created_at timestamptz not null default now(),
-	updated_at timestamptz not null default now(),
-	foreign key (coach_cpf) references coaches(cpf)
+-- Tabela para registrar o histórico de salário dos coaches ao longo do tempo
+CREATE TABLE coach_salary_history (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    cpf_coach VARCHAR(11) NOT NULL,
+    salario DECIMAL(10,2) NOT NULL,
+    data_inicio DATE NOT NULL,
+    data_fim DATE,
+    motivo VARCHAR(255),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    
+    CONSTRAINT fk_salary_history_coach FOREIGN KEY (cpf_coach) REFERENCES coaches(cpf) ON DELETE CASCADE
 );
